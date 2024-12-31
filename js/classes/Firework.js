@@ -14,12 +14,12 @@ class Firework {
     constructor(params) {
         // Configuration for the blast (explosion).
         this.blast = {
-            colors: params.colors,                          
-            power: params.blastPower,                        
-            radius: params.blastRadius || 50,               
+            colors: params.colors,
+            power: params.blastPower,
+            radius: params.blastRadius || 50,
             particles: [],                                  // Array to hold active particles.
 
-            isStarted: false,                               // Flag indicating if the explosion has started.
+            isExploded: false,                               // Flag indicating if the explosion has started.
             isDone: false,                                  // Flag indicating if the explosion is complete.
         };
 
@@ -27,13 +27,14 @@ class Firework {
         this.charge = {
             x: params.launchPoint.x,                        // Initial x-coordinate of the charge.
             y: params.launchPoint.y,                        // Initial y-coordinate of the charge.
-            size: 4,                                        // Size of the charge.
+            size: 2,                                        // Size of the charge.
             color: 'white',                                 // Color of the charge.
-            speed: params.chargeSpeed,                       
-            launchPoint: params.launchPoint,                 
-            blastPoint: params.blastPoint,                   
+            speed: params.chargeSpeed,
+            launchPoint: params.launchPoint,
+            blastPoint: params.blastPoint,
 
             isLaunched: false,                              // Flag indicating if the charge has launched.
+            isLaunchDelayed: false,
         };
 
         this.parent = null;                                 // Reference to the rendering context.
@@ -71,16 +72,16 @@ class Firework {
 
             const particle = new Particle(
                 x,
-                y, 
-                color, 
-                angle, 
-                speed, 
+                y,
+                color,
+                angle,
+                speed,
                 Math.random() * 60 + 60  // Particle lifespan.
-            ); 
+            );
             this.blast.particles.push(particle);
 
             // Attach particle to the parent context.
-            particle.appendTo(this.parent); 
+            particle.appendTo(this.parent);
         }
     }
 
@@ -100,13 +101,31 @@ class Firework {
 
 
 
+
     /**
-     * Launches the firework, rendering the charge and triggering the explosion.
+     * Launches the firework with a delay.
      */
-    launch() {
+    launch(delay = 0) {
+        if(!this.charge.isLaunched) {
+            if (delay > 0) {
+                this.charge.isLaunchDelayed = true;
+                setTimeout(() => {
+                    this.charge.isLaunchDelayed = false;
+                    this.charge.isLaunched = true;
+                }, delay);
+            } else {
+                this.charge.isLaunched = true;
+            }
+        }
+    }
+
+    render() {
+        // If the charge is delayed, skip rendering
+        if (this.charge.isLaunchDelayed) return;
+
         if (this.parent) {
-            // If the charge has not yet exploded.
-            if (!this.charge.isLaunched) {
+            // If the blast has not yet exploded.
+            if (!this.blast.isExploded) {
                 // Move the charge toward the target (blast point).
                 this.charge.x += (this.charge.blastPoint.x - this.charge.x) * 0.05;
                 this.charge.y += (this.charge.blastPoint.y - this.charge.y) * 0.05;
@@ -116,7 +135,7 @@ class Firework {
                     Math.abs(this.charge.x - this.charge.blastPoint.x) < 5 &&
                     Math.abs(this.charge.y - this.charge.blastPoint.y) < 5
                 ) {
-                    this.charge.isLaunched = true; // Mark the charge as exploded.
+                    this.blast.isExploded = true;
                     this.createExplosionAt(
                         this.charge.blastPoint.x,
                         this.charge.blastPoint.y
