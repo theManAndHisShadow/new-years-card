@@ -115,7 +115,10 @@ app.appendChild(firework_4);
 app.execute(app => {
     // fill with color
     const color = '#0b1026';
-    app.renderer.fillStyle = color;
+    const gradient = app.renderer.createLinearGradient(0, 0, 0, app.screen.height);
+    gradient.addColorStop(0, '#030217'); // Конечный цве
+    gradient.addColorStop(1, '#0b1026'); // Начальный цвет
+    app.renderer.fillStyle = gradient;
     app.renderer.fillRect(
         app.bounds.leftTop.x,
         app.bounds.leftTop.y,
