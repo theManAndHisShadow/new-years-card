@@ -39,6 +39,8 @@ function createApp(params) {
         },
 
         loop: isAnimated,
+        
+        children: [],
 
         execute: function (code) {
             if (isAnimated) {
@@ -52,6 +54,17 @@ function createApp(params) {
                 code(this);
             }
         },
+
+        appendChild: function(scenesObject) {
+            this.children.push(scenesObject);
+            scenesObject.appendTo(this);
+        },
+
+        render: function() {
+            this.children.forEach(object => {
+                object.render();
+            });
+        },
     }
 }
 
@@ -64,16 +77,39 @@ let app = createApp({
     loop: true,
 });
 
-let firework = new Firework({
+let firework_1 = new Firework({
     launchPoint: { x: app.screen.width / 2, y: app.screen.height },
     blastPoint: { x: app.screen.width / 2, y: (app.screen.height / 2) - 100 },
-    areaWidth: 300,
-    areaHeight: 300,
+    blastPower: 300,
+    colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'],
+});
+
+let firework_2 = new Firework({
+    launchPoint: { x: app.screen.width / 2, y: app.screen.height + 80 },
+    blastPoint: { x: app.screen.width / 2 + 100, y: (app.screen.height / 2) - 50 },
+    blastPower: 70,
+    colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'],
+});
+
+let firework_3 = new Firework({
+    launchPoint: { x: app.screen.width / 2, y: app.screen.height + 100 },
+    blastPoint: { x: app.screen.width / 2 - 100, y: (app.screen.height / 2) - 50 },
     blastPower: 100,
     colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'],
 });
 
-firework.appendTo(app);
+let firework_4 = new Firework({
+    launchPoint: { x: app.screen.width / 2, y: app.screen.height },
+    blastPoint: { x: app.screen.width / 2, y: (app.screen.height / 2) - 100 },
+    blastPower: 1000,
+    blastRadius: 100,
+    colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'],
+});
+
+app.appendChild(firework_1);
+app.appendChild(firework_2);
+app.appendChild(firework_3);
+app.appendChild(firework_4);
 
 // add some code
 app.execute(app => {
@@ -86,6 +122,11 @@ app.execute(app => {
         app.bounds.rightBottom.x,
         app.bounds.rightBottom.y
     );
+    
+    app.render();
 
-    firework.launch();
+    firework_1.launch();
+    firework_2.launch(100);
+    firework_3.launch(200);
+    firework_4.launch(2000);
 });
